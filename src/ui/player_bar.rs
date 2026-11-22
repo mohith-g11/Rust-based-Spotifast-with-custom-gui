@@ -44,8 +44,9 @@ pub(crate) fn end_tint_session(ctx: &egui::Context) {
 }
 
 pub fn show(app: &mut App, ui: &mut egui::Ui) {
+    if app.lyrics_fullscreen.is_some() { return; }
     let palette = app.palette;
-    let fill = eased_fill(ui.ctx(), palette.panel, app.now_playing_tint());
+    let fill = palette.panel;
     egui::Panel::bottom("player-bar")
         .exact_size(theme::PLAYER_BAR_HEIGHT)
         .resizable(false)

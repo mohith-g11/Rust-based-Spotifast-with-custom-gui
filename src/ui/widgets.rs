@@ -462,7 +462,7 @@ fn menu_item_response(
     if ui.is_rect_visible(rect) {
         if (response.hovered() || highlighted) && enabled {
             ui.painter()
-                .rect_filled(rect, CornerRadius::same(6), palette.surface_hover);
+                .rect_filled(rect, CornerRadius::same(theme::RADIUS_SMALL), palette.surface_hover);
         }
         let color = if enabled { palette.text } else { palette.dim };
         let mut x = rect.left() + 10.0;
@@ -569,7 +569,7 @@ fn submenu<R>(
     if ui.is_rect_visible(rect) {
         if response.hovered() || is_open {
             ui.painter()
-                .rect_filled(rect, CornerRadius::same(6), palette.surface_hover);
+                .rect_filled(rect, CornerRadius::same(theme::RADIUS_SMALL), palette.surface_hover);
         }
         let color = palette.text;
         let mut x = rect.left() + 10.0;
@@ -1102,7 +1102,7 @@ fn picker_row(
     if ui.is_rect_visible(rect) {
         if response.hovered() || highlighted {
             ui.painter()
-                .rect_filled(rect, CornerRadius::same(6), palette.surface_hover);
+                .rect_filled(rect, CornerRadius::same(theme::RADIUS_SMALL), palette.surface_hover);
         }
         let cover_rect =
             Rect::from_center_size(pos2(rect.left() + 20.0, rect.center().y), Vec2::splat(28.0));
@@ -1841,7 +1841,7 @@ fn track_row_contents(
         // color so selecting a song does not mark it as playing.
         ui.painter().rect_filled(
             rect,
-            CornerRadius::same(6),
+            CornerRadius::same(theme::RADIUS_SMALL),
             palette
                 .secondary
                 .gamma_multiply(if hovered { 0.30 } else { 0.20 }),
@@ -1849,7 +1849,7 @@ fn track_row_contents(
     } else if hovered {
         ui.painter().rect_filled(
             rect,
-            CornerRadius::same(6),
+            CornerRadius::same(theme::RADIUS_SMALL),
             palette
                 .surface_hover
                 .gamma_multiply(if palette.dark { 0.7 } else { 1.0 }),
@@ -1923,7 +1923,7 @@ fn track_row_contents(
             let scrim = |alpha: u8| {
                 painter.rect_filled(
                     cover_rect,
-                    CornerRadius::same(4),
+                    CornerRadius::same(theme::RADIUS_SMALL),
                     Color32::from_black_alpha(alpha),
                 );
             };
@@ -3096,7 +3096,7 @@ pub fn skeleton_rows(ui: &mut Ui, palette: &Palette, locale: Locale, count: usiz
             pos2(rect.left() + 12.0, top + (theme::ROW_HEIGHT - 40.0) / 2.0),
             Vec2::splat(40.0),
         );
-        painter.rect_filled(cover, CornerRadius::same(4), fill);
+        painter.rect_filled(cover, CornerRadius::same(theme::RADIUS_SMALL), fill);
         let room = (rect.right() - cover.right() - 32.0).clamp(0.0, 420.0);
         for (line, (y, height)) in [(top + 18.0, 10.0), (top + 34.0, 8.0)]
             .into_iter()
@@ -3106,7 +3106,7 @@ pub fn skeleton_rows(ui: &mut Ui, palette: &Palette, locale: Locale, count: usiz
                 pos2(cover.right() + 14.0, y),
                 vec2(room * skeleton_share(index, line), height),
             );
-            painter.rect_filled(bar, CornerRadius::same(4), fill);
+            painter.rect_filled(bar, CornerRadius::same(theme::RADIUS_SMALL), fill);
         }
     }
 }
@@ -3173,12 +3173,12 @@ fn skeleton_cards_sized(
             pos2(art.left(), art.bottom() + 12.0),
             vec2(CARD_ART * skeleton_share(index, 0), 12.0),
         );
-        painter.rect_filled(title, CornerRadius::same(4), fill);
+        painter.rect_filled(title, CornerRadius::same(theme::RADIUS_SMALL), fill);
         let subtitle = Rect::from_min_size(
             pos2(art.left(), title.bottom() + 8.0),
             vec2(CARD_ART * skeleton_share(index, 1), 9.0),
         );
-        painter.rect_filled(subtitle, CornerRadius::same(4), fill);
+        painter.rect_filled(subtitle, CornerRadius::same(theme::RADIUS_SMALL), fill);
     }
 }
 
@@ -3815,7 +3815,7 @@ pub fn labeled_field(
             ui.add_space(6.0);
             Frame::new()
                 .fill(palette.surface)
-                .corner_radius(CornerRadius::same(8))
+                .corner_radius(CornerRadius::same(theme::RADIUS))
                 .inner_margin(Margin::symmetric(12, 10))
                 .show(ui, |ui| {
                     text_edit(
@@ -4013,7 +4013,7 @@ pub fn copyable_text(
     let body = |ui: &mut egui::Ui, room: Option<f32>| {
         Frame::new()
             .fill(palette.surface)
-            .corner_radius(CornerRadius::same(6))
+            .corner_radius(CornerRadius::same(theme::RADIUS_SMALL))
             .inner_margin(Margin::symmetric(10, 6))
             .show(ui, |ui| {
                 let label = egui::Label::new(
@@ -4825,7 +4825,7 @@ mod tests {
                         {
                             shape.stroke == Stroke::NONE
                                 && (shape.rect != rect
-                                    || shape.corner_radius == CornerRadius::same(6))
+                                    || shape.corner_radius == CornerRadius::same(theme::RADIUS_SMALL))
                         }
                         _ => true,
                     }),

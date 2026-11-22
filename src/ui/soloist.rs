@@ -293,7 +293,7 @@ fn activity(ui: &mut egui::Ui, palette: &theme::Palette, label: &str) {
 fn device_name(ui: &mut egui::Ui, palette: &theme::Palette, name: &str) {
     Frame::new()
         .fill(palette.surface)
-        .corner_radius(CornerRadius::same(8))
+        .corner_radius(CornerRadius::same(theme::RADIUS))
         .inner_margin(Margin::symmetric(12, 9))
         .show(ui, |ui| {
             ui.set_width(ui.available_width());
@@ -404,7 +404,7 @@ fn key(app: &mut App, ui: &mut egui::Ui, failure: Option<Failure>) {
         super::login::step(ui, &palette, 2, &gettext(locale, "Paste it here."), |ui| {
             let response = Frame::new()
                 .fill(palette.surface)
-                .corner_radius(CornerRadius::same(8))
+                .corner_radius(CornerRadius::same(theme::RADIUS))
                 .inner_margin(Margin::symmetric(12, 9))
                 .show(ui, |ui| {
                     super::widgets::text_edit(
@@ -606,7 +606,7 @@ fn pairing_help(app: &mut App, ui: &mut egui::Ui) {
     let locale = app.locale;
     Frame::new()
         .fill(palette.surface)
-        .corner_radius(CornerRadius::same(8))
+        .corner_radius(CornerRadius::same(theme::RADIUS))
         .inner_margin(Margin::same(12))
         .show(ui, |ui| {
             ui.set_width(ui.available_width());

@@ -292,7 +292,7 @@ pub fn episode_row(
     if hovered {
         ui.painter().rect_filled(
             rect,
-            CornerRadius::same(6),
+            CornerRadius::same(theme::RADIUS_SMALL),
             palette
                 .surface_hover
                 .gamma_multiply(if palette.dark { 0.7 } else { 1.0 }),

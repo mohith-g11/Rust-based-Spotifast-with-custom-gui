@@ -222,7 +222,7 @@ fn quick_access(app: &mut App, ui: &mut egui::Ui) {
                     } else {
                         palette.surface
                     };
-                    ui.painter().rect_filled(rect, CornerRadius::same(6), fill);
+                    ui.painter().rect_filled(rect, CornerRadius::same(theme::RADIUS_SMALL), fill);
                     let cover = Rect::from_min_size(rect.min, Vec2::splat(TILE_HEIGHT));
                     if *liked {
                         super::sidebar::liked_cover(ui, cover, 6.0);

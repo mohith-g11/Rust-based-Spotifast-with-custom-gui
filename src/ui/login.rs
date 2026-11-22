@@ -375,7 +375,7 @@ fn client_id_field(app: &mut App, ui: &mut egui::Ui) {
     let mut client_id = app.settings.web_client_id.clone().unwrap_or_default();
     let response = Frame::new()
         .fill(palette.surface)
-        .corner_radius(CornerRadius::same(8))
+        .corner_radius(CornerRadius::same(theme::RADIUS))
         .inner_margin(Margin::symmetric(12, 9))
         .show(ui, |ui| {
             super::widgets::text_edit(

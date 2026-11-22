@@ -321,7 +321,7 @@ fn text_field(
 ) -> egui::Response {
     let response = Frame::new()
         .fill(palette.surface)
-        .corner_radius(CornerRadius::same(6))
+        .corner_radius(CornerRadius::same(theme::RADIUS_SMALL))
         .inner_margin(Margin::symmetric(12, 8))
         .show(ui, |ui| {
             super::widgets::text_edit(
@@ -542,7 +542,7 @@ fn edit_playlist(app: &mut App, ui: &mut egui::Ui) {
             );
             Frame::new()
                 .fill(palette.surface)
-                .corner_radius(CornerRadius::same(6))
+                .corner_radius(CornerRadius::same(theme::RADIUS_SMALL))
                 .inner_margin(Margin::symmetric(12, 8))
                 .show(ui, |ui| {
                     super::widgets::text_edit(

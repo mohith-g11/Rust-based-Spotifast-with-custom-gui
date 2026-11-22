@@ -666,7 +666,7 @@ fn paint_expanded_art(app: &mut App, ui: &mut egui::Ui, rect: Rect) {
             spread: 0,
             color: egui::Color32::from_black_alpha(if palette.dark { 120 } else { 40 }),
         }
-        .as_shape(rect, egui::CornerRadius::same(8)),
+        .as_shape(rect, egui::CornerRadius::same(theme::RADIUS)),
     );
     super::widgets::playing_cover(
         ui,
@@ -1518,23 +1518,23 @@ fn contents(app: &mut App, ui: &mut egui::Ui, grid_art: Option<Rect>) {
                 if ui.is_rect_visible(rect) {
                     if active {
                         ui.painter()
-                            .rect_filled(rect, CornerRadius::same(6), palette.surface);
+                            .rect_filled(rect, CornerRadius::same(theme::RADIUS_SMALL), palette.surface);
                     } else if response.hovered() {
                         ui.painter().rect_filled(
                             rect,
-                            CornerRadius::same(6),
+                            CornerRadius::same(theme::RADIUS_SMALL),
                             palette.surface_hover.gamma_multiply(0.6),
                         );
                     }
                     if drop_hover {
                         ui.painter().rect_filled(
                             rect,
-                            CornerRadius::same(6),
+                            CornerRadius::same(theme::RADIUS_SMALL),
                             palette.accent.gamma_multiply(0.18),
                         );
                         ui.painter().rect_stroke(
                             rect,
-                            CornerRadius::same(6),
+                            CornerRadius::same(theme::RADIUS_SMALL),
                             egui::Stroke::new(1.5, palette.accent),
                             egui::StrokeKind::Inside,
                         );
@@ -1689,7 +1689,7 @@ fn contents(app: &mut App, ui: &mut egui::Ui, grid_art: Option<Rect>) {
                     if dragging_song && !droppable {
                         ui.painter().rect_filled(
                             rect,
-                            CornerRadius::same(6),
+                            CornerRadius::same(theme::RADIUS_SMALL),
                             palette.panel.gamma_multiply(0.5),
                         );
                     }
@@ -1870,11 +1870,11 @@ fn library_grid(
                     if ui.is_rect_visible(rect) {
                         if active {
                             ui.painter()
-                                .rect_filled(rect, CornerRadius::same(6), palette.surface);
+                                .rect_filled(rect, CornerRadius::same(theme::RADIUS_SMALL), palette.surface);
                         } else if response.hovered() {
                             ui.painter().rect_filled(
                                 rect,
-                                CornerRadius::same(6),
+                                CornerRadius::same(theme::RADIUS_SMALL),
                                 palette.surface_hover.gamma_multiply(0.6),
                             );
                         }
@@ -1883,7 +1883,7 @@ fn library_grid(
                         } else if entry.folder.is_some() {
                             ui.painter().rect_filled(
                                 cover_rect,
-                                CornerRadius::same(6),
+                                CornerRadius::same(theme::RADIUS_SMALL),
                                 palette.surface,
                             );
                             Icon::Library
@@ -1956,7 +1956,7 @@ fn library_grid(
                         if dragging_song && !droppable {
                             ui.painter().rect_filled(
                                 rect,
-                                CornerRadius::same(6),
+                                CornerRadius::same(theme::RADIUS_SMALL),
                                 palette.panel.gamma_multiply(0.5),
                             );
                         } else if dragging_song
@@ -1965,7 +1965,7 @@ fn library_grid(
                         {
                             ui.painter().rect_stroke(
                                 cover_rect,
-                                CornerRadius::same(6),
+                                CornerRadius::same(theme::RADIUS_SMALL),
                                 egui::Stroke::new(2.0, palette.accent),
                                 egui::StrokeKind::Inside,
                             );

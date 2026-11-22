@@ -42,12 +42,12 @@ impl Palette {
     pub fn dark() -> Self {
         Self {
             dark: true,
-            window: Color32::from_rgb(0x0f, 0x11, 0x14),
-            panel: Color32::from_rgb(0x15, 0x18, 0x1c),
-            surface: Color32::from_rgb(0x1d, 0x21, 0x27),
-            surface_hover: Color32::from_rgb(0x26, 0x2b, 0x33),
-            surface_active: Color32::from_rgb(0x2f, 0x35, 0x3f),
-            outline: Color32::from_rgb(0x2a, 0x30, 0x38),
+            window: Color32::from_rgb(0x0b, 0x0d, 0x10),
+            panel: Color32::from_rgb(0x10, 0x13, 0x18),
+            surface: Color32::from_rgb(0x17, 0x1b, 0x22),
+            surface_hover: Color32::from_rgb(0x20, 0x26, 0x30),
+            surface_active: Color32::from_rgb(0x29, 0x30, 0x3d),
+            outline: Color32::from_rgb(0x22, 0x28, 0x32),
             text: Color32::from_rgb(0xf2, 0xf4, 0xf6),
             secondary: Color32::from_rgb(0xa9, 0xb1, 0xbc),
             dim: Color32::from_rgb(0x6e, 0x77, 0x84),
@@ -233,8 +233,8 @@ fn status_detail(status: Option<fastframe_theme::Status>, locale: Locale) -> Cow
     }
 }
 
-pub const RADIUS: u8 = 8;
-pub const RADIUS_SMALL: u8 = 4;
+pub const RADIUS: u8 = 14;
+pub const RADIUS_SMALL: u8 = 8;
 pub const ROW_HEIGHT: f32 = 56.0;
 pub const COMPACT_ROW_HEIGHT: f32 = 48.0;
 /// The compact track list: one line, no cover.
