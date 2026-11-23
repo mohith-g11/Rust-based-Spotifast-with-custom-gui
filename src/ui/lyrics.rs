@@ -504,8 +504,6 @@ fn with_cover(app: &mut App, ui: &mut egui::Ui, rect: Rect, top: f32) {
 /// The playing song's cover filling the top of `column`, with its title and
 /// artists beneath, aligned to its left edge or centred.
 /// One transport button of the cover overlay, centred exactly on `center`.
-/// It gets its own rect (icon + `theme::ICON_BUTTON_PAD`), so no layout can
-/// shift it or grow the row.
 fn cover_button(
     ui: &mut egui::Ui,
     key: &'static str,
@@ -545,10 +543,8 @@ fn big_cover(app: &mut App, ui: &mut egui::Ui, column: Rect, align: Align) {
         let mut c_ui = overlay.new_child(UiBuilder::new().max_rect(controls_rect));
 
         c_ui.with_layout(Layout::bottom_up(Align::Center), |ui| {
-            // BOTTOM: SLIDER ROW
             ui.allocate_ui_with_layout(vec2(cover.width(), 20.0), Layout::left_to_right(Align::Center), |ui| {
-                ui.add_space(24.0); // Left margin
-
+                ui.add_space(24.0);
                 let (position, duration) = (now.position_ms, now.duration_ms);
                 let fraction = if duration > 0 { position as f32 / duration as f32 } else { 0.0 };
                 let shown_pos = app.seek_preview.map(|f| (f * duration as f32) as u32).unwrap_or(position);
@@ -561,13 +557,10 @@ fn big_cover(app: &mut App, ui: &mut egui::Ui, column: Rect, align: Align) {
                     super::widgets::SliderEvent::Committed(val) => { app.seek_preview = None; if duration > 0 { app.actions.push(Action::Seek((val * duration as f32) as u32)); } }
                     _ => {}
                 }
-
                 ui.add(egui::Label::new(egui::RichText::new(util::format_duration_ms(duration)).font(theme::regular(12.0)).color(Color32::WHITE)));
             });
         });
 
-        // CONTROLS: all five buttons share one centre line (cy) and are spread
-        // symmetrically around the cover's centre (cx), so they stay centred.
         let pal = theme::Palette::dark();
         let k = (cover.width() / 420.0).clamp(0.75, 1.0);
         let cx = cover.center().x;
@@ -575,24 +568,14 @@ fn big_cover(app: &mut App, ui: &mut egui::Ui, column: Rect, align: Align) {
         let at = |dx: f32| egui::pos2(cx + dx * k, cy);
 
         let shuf_col = if now.shuffle { pal.accent } else { Color32::WHITE };
-        if cover_button(ui, "shuffle", at(-118.0), Icon::Shuffle, 20.0, shuf_col, pal.accent) {
-            app.actions.push(Action::ToggleShuffle);
-        }
-        if cover_button(ui, "prev", at(-66.0), Icon::SkipBackFilled, 28.0, Color32::WHITE, pal.accent) {
-            app.actions.push(Action::Previous);
-        }
+        if cover_button(ui, "shuffle", at(-118.0), Icon::Shuffle, 20.0, shuf_col, pal.accent) { app.actions.push(Action::ToggleShuffle); }
+        if cover_button(ui, "prev", at(-66.0), Icon::SkipBackFilled, 28.0, Color32::WHITE, pal.accent) { app.actions.push(Action::Previous); }
         let play_icon = if now.playing { Icon::PauseFilled } else { Icon::PlayFilled };
-        if cover_button(ui, "play", at(0.0), play_icon, 48.0, Color32::WHITE, pal.accent) {
-            app.actions.push(Action::TogglePlay);
-        }
-        if cover_button(ui, "next", at(66.0), Icon::SkipForwardFilled, 28.0, Color32::WHITE, pal.accent) {
-            app.actions.push(Action::Next);
-        }
+        if cover_button(ui, "play", at(0.0), play_icon, 48.0, Color32::WHITE, pal.accent) { app.actions.push(Action::TogglePlay); }
+        if cover_button(ui, "next", at(66.0), Icon::SkipForwardFilled, 28.0, Color32::WHITE, pal.accent) { app.actions.push(Action::Next); }
         let rep_col = if now.repeat != RepeatMode::Off { pal.accent } else { Color32::WHITE };
         let rep_ic = if now.repeat == RepeatMode::Track { Icon::Repeat1 } else { Icon::Repeat };
-        if cover_button(ui, "repeat", at(118.0), rep_ic, 20.0, rep_col, pal.accent) {
-            app.actions.push(Action::CycleRepeat);
-        }
+        if cover_button(ui, "repeat", at(118.0), rep_ic, 20.0, rep_col, pal.accent) { app.actions.push(Action::CycleRepeat); }
     }
 
     let words = Rect::from_min_max(pos2(column.left(), cover.bottom() + 24.0), column.max);
@@ -841,12 +824,19 @@ fn fullscreen_contents(app: &mut App, ui: &mut egui::Ui) {
     if !app.actions.iter().any(|action| matches!(action, Action::FollowLyrics)) {
         app.actions.push(Action::LyricsLineShown(active));
     }
+    
+    // ANTI-FLICKER LOCK: Capture viewport width outside the ScrollArea so it 
+    // never shrinks when a scrollbar is drawn, cutting off the feedback loop.
     let viewport = ui.available_rect_before_wrap();
+    let base_width = viewport.width();
+    
     let manual_scroll = ui.rect_contains_pointer(viewport) && ui.input(|i| i.smooth_scroll_delta.y != 0.0 || (i.pointer.primary_down() && i.pointer.delta().y != 0.0)); 
     let following = app.lyrics_following && !manual_scroll;
     let follow = following && app.lyrics_line_shown != Some(active);
+    
+    // MASTER ANIMATION: Silky smooth native scroll
     let animation = crate::motion::scroll(ui.ctx(), 0.45);
-    let size = (ui.available_width() * 0.048).clamp(30.0, 44.0);
+    let size = (base_width * 0.048).clamp(30.0, 44.0);
     
     let quiet = palette.text.gamma_multiply(0.42);
     ui.spacing_mut().scroll.fade.strength = 0.0;
@@ -863,14 +853,14 @@ fn fullscreen_contents(app: &mut App, ui: &mut egui::Ui) {
             let is_active = active == Some(index);
             let lit = ui.ctx().animate_bool_with_time(egui::Id::new("lyric-line").with(("fullscreen", &now.uri, index)), is_active, crate::motion::seconds(ui.ctx(), 0.3));
             
-            // Forces pure white for the active lines
             let color = if lyrics.synced { blend(quiet, Color32::WHITE, lit) } else { palette.text };
-            // egui caches glyphs per exact font size, so a size that changes every frame
-            // re-rasterizes the whole line every frame. Snap the growth to 12 steps:
-            // still smooth to the eye, but each size is only ever rasterized once.
-            let grown = if lyrics.synced { 1.0 + (SUNG_LINE_GROWTH - 1.0) * ((lit * 12.0).round() / 12.0) } else { 1.0 };
-            let wrap = ui.available_width() / SUNG_LINE_GROWTH * grown;
+            
+            // MASTER ANIMATION: Restored smooth continuous growth
+            let grown = if lyrics.synced { 1.0 + (SUNG_LINE_GROWTH - 1.0) * lit } else { 1.0 };
             let font = theme::bold(size * grown);
+            
+            // ANTI-FLICKER LOCK: Wrap width dynamically tied to constant viewport width
+            let wrap = (base_width - 40.0) / SUNG_LINE_GROWTH * grown;
             
             let text = if line.text.is_empty() && lyrics.synced { "\u{266a}" } else { line.text.as_str() };
             
@@ -914,8 +904,7 @@ fn fullscreen_contents(app: &mut App, ui: &mut egui::Ui) {
                 ui.painter().layout_job(job)
             };
             
-            // Painted here (not via a Label) so a line fades out before it reaches the top or
-            // bottom edge of the scroll area, instead of being cut in half by it.
+            // ANTI-CLIPPING: Edge Fade
             const EDGE_FADE: f32 = 56.0;
             let (line_rect, response) = ui.allocate_exact_size(galley.size(), Sense::click());
             let edge_top = ((line_rect.top() - viewport.top()) / EDGE_FADE).clamp(0.0, 1.0);
@@ -930,7 +919,7 @@ fn fullscreen_contents(app: &mut App, ui: &mut egui::Ui) {
                 app.actions.push(Action::FollowLyrics);
             }
             
-            // Uses smooth animation targeting to fix the jump-to-next-page bug
+            // Master smooth jump prevention
             if is_active && follow { show_sung_line(ui, response.rect, Some(animation)); }
             ui.add_space(27.0);
         }
@@ -945,13 +934,8 @@ fn fullscreen_contents(app: &mut App, ui: &mut egui::Ui) {
     });
 
     if manual_scroll && app.lyrics_following { app.actions.push(Action::PauseLyricsFollow); }
-    if now.playing && lyrics.synced {
-        if active.is_some() {
-            // One frame per display refresh, paced by vsync.
-            ui.ctx().request_repaint();
-        } else if let Some(next) = lyrics.lines.iter().filter_map(|l| l.at_ms).find(|at| *at > now.position_ms) {
-            ui.ctx().request_repaint_after(std::time::Duration::from_millis(u64::from(next - now.position_ms)));
-        }
+    if now.playing {
+        ui.ctx().request_repaint();
     }
 }
 #[cfg(test)]
