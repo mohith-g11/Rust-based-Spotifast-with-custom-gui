@@ -865,7 +865,10 @@ fn fullscreen_contents(app: &mut App, ui: &mut egui::Ui) {
             
             // Forces pure white for the active lines
             let color = if lyrics.synced { blend(quiet, Color32::WHITE, lit) } else { palette.text };
-            let grown = if lyrics.synced { 1.0 + (SUNG_LINE_GROWTH - 1.0) * lit } else { 1.0 };
+            // egui caches glyphs per exact font size, so a size that changes every frame
+            // re-rasterizes the whole line every frame. Snap the growth to 12 steps:
+            // still smooth to the eye, but each size is only ever rasterized once.
+            let grown = if lyrics.synced { 1.0 + (SUNG_LINE_GROWTH - 1.0) * ((lit * 12.0).round() / 12.0) } else { 1.0 };
             let wrap = ui.available_width() / SUNG_LINE_GROWTH * grown;
             let font = theme::bold(size * grown);
             
@@ -911,7 +914,17 @@ fn fullscreen_contents(app: &mut App, ui: &mut egui::Ui) {
                 ui.painter().layout_job(job)
             };
             
-            let response = ui.add(egui::Label::new(galley).sense(Sense::click()));
+            // Painted here (not via a Label) so a line fades out before it reaches the top or
+            // bottom edge of the scroll area, instead of being cut in half by it.
+            const EDGE_FADE: f32 = 56.0;
+            let (line_rect, response) = ui.allocate_exact_size(galley.size(), Sense::click());
+            let edge_top = ((line_rect.top() - viewport.top()) / EDGE_FADE).clamp(0.0, 1.0);
+            let edge_bottom = ((viewport.bottom() - line_rect.bottom()) / EDGE_FADE).clamp(0.0, 1.0);
+            let edge = edge_top.min(edge_bottom);
+            let edge_alpha = edge * edge * (3.0 - 2.0 * edge);
+            if edge_alpha > 0.0 && ui.is_rect_visible(line_rect) {
+                ui.painter().add(egui::epaint::TextShape::new(line_rect.min, galley, Color32::WHITE).with_opacity_factor(edge_alpha));
+            }
             if lyrics.synced && response.clicked() && let Some(at_ms) = line.at_ms {
                 app.actions.push(Action::Seek(at_ms));
                 app.actions.push(Action::FollowLyrics);
@@ -932,8 +945,13 @@ fn fullscreen_contents(app: &mut App, ui: &mut egui::Ui) {
     });
 
     if manual_scroll && app.lyrics_following { app.actions.push(Action::PauseLyricsFollow); }
-    if now.playing && lyrics.synced && let Some(next) = lyrics.lines.iter().filter_map(|l| l.at_ms).find(|at| *at > now.position_ms) {
-        ui.ctx().request_repaint_after(std::time::Duration::from_millis(if active.is_some() { 16 } else { u64::from(next - now.position_ms) }));
+    if now.playing && lyrics.synced {
+        if active.is_some() {
+            // One frame per display refresh, paced by vsync.
+            ui.ctx().request_repaint();
+        } else if let Some(next) = lyrics.lines.iter().filter_map(|l| l.at_ms).find(|at| *at > now.position_ms) {
+            ui.ctx().request_repaint_after(std::time::Duration::from_millis(u64::from(next - now.position_ms)));
+        }
     }
 }
 #[cfg(test)]
